@@ -45,7 +45,7 @@ public class StaffPatternController {
         category = staffedu.getCategory();
         qual = staffedu.getQual();
         major = staffedu.getMajor();
-        graduate = staffedu.getMajor();
+        graduate = staffedu.getGraduate();
         staffEduDAO.save(staffedu);
         //存储数据
         return "homePage/success";
