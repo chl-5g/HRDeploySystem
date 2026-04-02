@@ -34,6 +34,8 @@
         <property name="maxStatementsPerConnection" value="${maxStatementsPerConnection}"/>
         <!--最大空闲时间,1800秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0 -->
         <property name="maxIdleTime" value="${maxIdleTime}"/>
+        <!-- 获取连接超时（毫秒），避免数据库不可用时请求长时间阻塞 -->
+        <property name="checkoutTimeout" value="${checkoutTimeout}"/>
     </bean>
 
     <!-- 配置SessionFactory -->

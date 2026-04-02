@@ -51,6 +51,21 @@
         <url-pattern>/</url-pattern>
     </servlet-mapping>
 
+    <!-- 登录专用 Dispatcher，避免 /welcome 被旧控制器初始化拖住 -->
+    <servlet>
+        <servlet-name>auth-dispatcher</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:auth-dispatcher.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>auth-dispatcher</servlet-name>
+        <url-pattern>/welcome</url-pattern>
+    </servlet-mapping>
+
     <!-- API 专用 Dispatcher，和旧页面流量分离 -->
     <servlet>
         <servlet-name>api-dispatcher</servlet-name>

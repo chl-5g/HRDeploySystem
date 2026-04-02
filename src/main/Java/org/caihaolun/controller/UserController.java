@@ -1,15 +1,14 @@
 package org.caihaolun.controller;
 
-import org.caihaolun.dao.UserDAO;
 import org.caihaolun.model.User;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.*;
+import java.util.concurrent.*;
 
 /**
  * Created by Administrator on 2017/3/9.
@@ -17,13 +16,11 @@ import javax.servlet.http.HttpServletRequest;
  */
 @Controller
 public class UserController {
-    private static UserDAO userDAO;
-
-    static {
-        ApplicationContext ctx =
-                new ClassPathXmlApplicationContext("applicationContext.xml");//读取bean.xml中的内容
-        userDAO = ctx.getBean("userDAO", UserDAO.class);//创建bean的引用对象
-    }
+    private static final ExecutorService LOGIN_EXECUTOR = Executors.newCachedThreadPool();
+    private static final int LOGIN_TIMEOUT_SECONDS = 3;
+    private static final String JDBC_URL = "jdbc:mysql://127.0.0.1:3306/hrdeploysystem?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=3000&socketTimeout=3000";
+    private static final String JDBC_USER = "root";
+    private static final String JDBC_PASSWORD = "1234";
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String index() {
@@ -38,8 +35,8 @@ public class UserController {
     @RequestMapping(value = "welcome", method = RequestMethod.POST)
     public String loginValidate(@ModelAttribute("user") User user, ModelMap modelMap) {
         try {
-            User user_ = userDAO.findByID(user.getEmail());
-            if (userDAO.findByID(user.getEmail()) == null) {
+            User user_ = findUserWithTimeout(user.getEmail());
+            if (user_ == null) {
                 //用户名输入错误或用户不存在
                 return "error";
             } else if (user.getPassword().equals(user_.getPassword())) {
@@ -50,10 +47,31 @@ public class UserController {
                 //密码输入错误
                 return "error";
             }
+        } catch (TimeoutException ex) {
+            return "errorDb";
         } catch (Exception ex) {
-            ex.printStackTrace();
+            return "errorDb";
         }
-        return null;
+    }
+
+    private User findUserWithTimeout(final String email) throws Exception {
+        Future<User> f = LOGIN_EXECUTOR.submit(new Callable<User>() {
+            @Override
+            public User call() throws Exception {
+                return queryUser(email);
+            }
+        });
+        try {
+            return f.get(LOGIN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (TimeoutException ex) {
+            f.cancel(true);
+            throw ex;
+        } catch (ExecutionException ex) {
+            if (ex.getCause() instanceof Exception) {
+                throw (Exception) ex.getCause();
+            }
+            throw new RuntimeException(ex.getCause());
+        }
     }
 
 
@@ -74,7 +92,7 @@ public class UserController {
     @RequestMapping(value = "addUser", method = RequestMethod.POST)
     public String insertUser(@ModelAttribute("user") User user) {
         try {
-            userDAO.save(user);
+            upsertUser(user);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -111,5 +129,72 @@ public class UserController {
         user.setPassword(password);
         System.out.println(user.getEmail() + " " + user.getUsername());
         return user;
+    }
+
+    private User queryUser(String email) throws Exception {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
+            ps = conn.prepareStatement("SELECT email, username, password FROM user_ WHERE email = ? LIMIT 1");
+            ps.setString(1, email);
+            rs = ps.executeQuery();
+            if (!rs.next()) {
+                return null;
+            }
+            User u = new User();
+            u.setEmail(rs.getString("email"));
+            u.setUsername(rs.getString("username"));
+            u.setPassword(rs.getString("password"));
+            return u;
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (Exception ignore) {
+                }
+            }
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (Exception ignore) {
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (Exception ignore) {
+                }
+            }
+        }
+    }
+
+    private void upsertUser(User user) throws Exception {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
+            ps = conn.prepareStatement("INSERT INTO user_ (email, username, password) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE username = VALUES(username), password = VALUES(password)");
+            ps.setString(1, user.getEmail());
+            ps.setString(2, user.getUsername());
+            ps.setString(3, user.getPassword());
+            ps.executeUpdate();
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (Exception ignore) {
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (Exception ignore) {
+                }
+            }
+        }
     }
 }

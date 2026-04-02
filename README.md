@@ -116,6 +116,29 @@
 - 用户：`root`
 - 密码：`1234`（建议改为本地实际密码）
 
+### 2.1) 数据库当前状态（本仓库已按此验证）
+- MySQL：`8.0.x`，本地监听 `127.0.0.1:3306`。
+- JDBC 驱动：`com.mysql.cj.jdbc.Driver`（`mysql-connector-j 8.0.33`）。
+- 连接参数（默认）：`serverTimezone=Asia/Shanghai`、`useSSL=false`、`allowPublicKeyRetrieval=true`。
+- 已使用库：`hrdeploysystem`。
+- 登录依赖表：`user_`（字段：`email` 主键、`username`、`password`）。
+
+可用以下命令快速自检：
+```bash
+nc -zv 127.0.0.1 3306
+mysql -h127.0.0.1 -P3306 -uroot -p -e "USE hrdeploysystem; SHOW TABLES LIKE 'user_';"
+```
+
+若 `user_` 不存在，可先初始化：
+```sql
+CREATE TABLE IF NOT EXISTS user_ (
+  email VARCHAR(128) NOT NULL,
+  username VARCHAR(128),
+  password VARCHAR(128),
+  PRIMARY KEY (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+```
+
 ### 3) 编译打包
 ```bash
 mvn -DskipTests package
