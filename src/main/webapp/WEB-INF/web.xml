@@ -27,13 +27,10 @@
     <!--</listener>-->
     <!-- log4J_End -->
 
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:applicationContext.xml</param-value>
-    </context-param>
+    <!--
+      为了本地快速预览 JSP 页面，先关闭 root context 启动。
+      这样不会在应用启动阶段加载数据库相关 Bean。
+    -->
 
     <servlet>
         <servlet-name>dispatcher</servlet-name>
@@ -47,11 +44,26 @@
             <!--4、多个值用逗号分隔-->
             <param-value>classpath:dispatcher.xml</param-value>
         </init-param>
-        <load-on-startup>1</load-on-startup>
+        <!-- 懒加载 DispatcherServlet，避免启动阶段阻塞 -->
     </servlet>
     <servlet-mapping>
         <servlet-name>dispatcher</servlet-name>
         <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+    <!-- API 专用 Dispatcher，和旧页面流量分离 -->
+    <servlet>
+        <servlet-name>api-dispatcher</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:api-dispatcher.xml</param-value>
+        </init-param>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>api-dispatcher</servlet-name>
+        <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
 
     <filter>
