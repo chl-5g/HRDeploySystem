@@ -1,68 +1,36 @@
 package org.caihaolun.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.Objects;
 
-/**
- * Created by Administrator on 2017/3/9.
- */
 @Entity
+@Table(name = "dept")
 public class Dept {
-    private String id;
-    private String deptname;
-    private String deptid;
 
     @Id
-    @Column(name = "id")
-    public String getId() {
-        return id;
-    }
+    @Column(length = 64)
+    private String id;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    @Column(length = 64)
+    private String deptname;
 
-    @Basic
-    @Column(name = "deptname")
-    public String getDeptname() {
-        return deptname;
-    }
+    @Column(length = 64)
+    private String deptid;
 
-    public void setDeptname(String deptname) {
-        this.deptname = deptname;
-    }
-
-    @Basic
-    @Column(name = "deptid")
-    public String getDeptid() {
-        return deptid;
-    }
-
-    public void setDeptid(String deptid) {
-        this.deptid = deptid;
-    }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+    public String getDeptname() { return deptname; }
+    public void setDeptname(String deptname) { this.deptname = deptname; }
+    public String getDeptid() { return deptid; }
+    public void setDeptid(String deptid) { this.deptid = deptid; }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Dept dept = (Dept) o;
-
-        if (id != null ? !id.equals(dept.id) : dept.id != null) return false;
-        if (deptname != null ? !deptname.equals(dept.deptname) : dept.deptname != null) return false;
-        if (deptid != null ? !deptid.equals(dept.deptid) : dept.deptid != null) return false;
-
-        return true;
+        if (!(o instanceof Dept)) return false;
+        return Objects.equals(id, ((Dept) o).id);
     }
 
     @Override
-    public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (deptname != null ? deptname.hashCode() : 0);
-        result = 31 * result + (deptid != null ? deptid.hashCode() : 0);
-        return result;
-    }
+    public int hashCode() { return Objects.hash(id); }
 }

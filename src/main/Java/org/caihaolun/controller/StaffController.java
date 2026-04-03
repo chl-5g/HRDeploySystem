@@ -1,134 +1,97 @@
 package org.caihaolun.controller;
 
-import org.caihaolun.dao.StaffDAO;
-import org.caihaolun.dao.StaffEduDAO;
-import org.caihaolun.dao.StaffPostDAO;
 import org.caihaolun.model.Staff;
+import org.caihaolun.model.Staffedu;
 import org.caihaolun.model.Staffpost;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
+import org.caihaolun.repository.StaffRepository;
+import org.caihaolun.repository.StaffeduRepository;
+import org.caihaolun.repository.StaffpostRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Created by Administrator on 2017/3/9.
- * staff
- */
-@Controller
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/staff")
 public class StaffController {
-    private static StaffDAO staffDAO;
-    private static StaffEduDAO staffEduDAO;
-    private static StaffPostDAO staffPostDAO;
 
-    private static Staff privateStaff;
+    private final StaffRepository staffRepo;
+    private final StaffeduRepository eduRepo;
+    private final StaffpostRepository postRepo;
 
-    static {
-        ApplicationContext ctx =
-                new ClassPathXmlApplicationContext("applicationContext.xml");//读取bean.xml中的内容
-        staffDAO = ctx.getBean("staffDAO", StaffDAO.class);//创建bean的引用对象
-        staffEduDAO = ctx.getBean("staffEduDAO", StaffEduDAO.class);//创建bean的引用对象
-        staffPostDAO = ctx.getBean("staffPostDAO", StaffPostDAO.class);//创建bean的引用对象
+    public StaffController(StaffRepository staffRepo, StaffeduRepository eduRepo, StaffpostRepository postRepo) {
+        this.staffRepo = staffRepo;
+        this.eduRepo = eduRepo;
+        this.postRepo = postRepo;
     }
 
-    @RequestMapping(value = "/welcome")
-    public String toMainPage() {
-        return "/homePage/welcome";
+    // ---- Staff CRUD ----
+
+    @GetMapping
+    public List<Staff> listAll() {
+        return staffRepo.findAll();
     }
 
-    @RequestMapping(value = "/homePage/staffs")
-    public String getAllStaff(ModelMap modelMap) throws Exception {
-        // 查询表中所有记录
-        // 将所有记录传递给要返回的jsp页面，放在staffList当中
-        modelMap.addAttribute("staffList", staffDAO.findAll());
-        // 返回原本jsp页面
-        return "homePage/tables/staff";
-    }
-
-    @RequestMapping(value = "/homePage/staffEdu")
-    public String getAllStaffEdu(ModelMap modelMap) throws Exception {
-        // 查询表中所有记录
-        // 将所有记录传递给要返回的jsp页面，放在staffList当中
-        modelMap.addAttribute("staffEduList", staffEduDAO.findAll());
-        // 返回原本jsp页面
-        return "homePage/tables/staffEdu";
-    }
-
-    @RequestMapping(value = "/homePage/staffPost")
-    public String getAllStaffPost(ModelMap modelMap) throws Exception {
-        // 查询表中所有记录
-        // 将所有记录传递给要返回的jsp页面，放在staffList当中
-        modelMap.addAttribute("staffPostList", staffPostDAO.findAll());
-        System.out.println(staffPostDAO.findAll());
-        // 返回原本jsp页面
-        return "homePage/tables/staffPost";
-    }
-
-    //增加
-    @RequestMapping(value = "/homePage/tables/add", method = RequestMethod.POST)
-    public String insertStaff(@RequestBody Staff staff) throws Exception {
-        System.out.println("success");
-        staffDAO.save(staff);
-        return "homePage/success";
-    }
-
-    //增加
-    @RequestMapping(value = "/addPost", method = RequestMethod.POST)
-    public String insertStaffPost(@RequestBody Staffpost staffPost) throws Exception {
-        staffPostDAO.save(staffPost);
-        return "homePage/success";
-    }
-
-
-    //查询
-    @RequestMapping(value = "/search")
-    public
-    @ResponseBody
-    Staff findStaff(String id) throws Exception {
-        Staff staff = staffDAO.findByID(id);
-        if (staff == null) {
-            return null;
-        } else {
-            privateStaff = staff;
-            return staff;
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getById(@PathVariable String id) {
+        Optional<Staff> staff = staffRepo.findById(id);
+        if (staff.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
+        Map<String, Object> detail = new LinkedHashMap<>();
+        detail.put("staff", staff.get());
+        eduRepo.findById(id).ifPresent(e -> detail.put("education", e));
+        postRepo.findById(id).ifPresent(p -> detail.put("position", p));
+        return ResponseEntity.ok(detail);
     }
 
-    //到结果界面
-    @RequestMapping(value = "/homePage/getResult")
-    public String getResult(ModelMap modelMap){
-        String id = privateStaff.getId();
-        modelMap.addAttribute("staff",privateStaff);
-        modelMap.addAttribute("staffEdu",staffEduDAO.findByID(id));
-        modelMap.addAttribute("staffPost",staffPostDAO.findByID(id));
-        return "homePage/getResult";
+    @PostMapping
+    public Staff create(@RequestBody Staff staff) {
+        return staffRepo.save(staff);
     }
 
-    // 到更新信息页面
-    @RequestMapping(value = "/update/{id}", method = RequestMethod.GET)
-    public String update(@PathVariable("id") String id, ModelMap modelMap) throws Exception {
-        Staff staff = staffDAO.findByID(id);
-        modelMap.addAttribute("staff", staff);
-        return "homePage/tables/updateStaff";
-    }
-
-    // 处理修改请求
-    @RequestMapping(value = "/update/ud", method = RequestMethod.POST)
-    public String updatePost(@ModelAttribute("staff") Staff staff) throws Exception {
-        staffDAO.save(staff);
-        return "homePage/success";
-    }
-
-    // 删除
-    @RequestMapping(value = "delete/{id}", method = RequestMethod.GET)
-    public String deleteStaff(@PathVariable("id") String id) {
-        try {
-            System.out.println(id);
-            staffDAO.delete(staffDAO.findByID(id));
-        } catch (Exception ex) {
-            ex.printStackTrace();
+    @PutMapping("/{id}")
+    public ResponseEntity<Staff> update(@PathVariable String id, @RequestBody Staff staff) {
+        if (!staffRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
         }
-        return "homePage/success";
+        staff.setId(id);
+        return ResponseEntity.ok(staffRepo.save(staff));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        if (!staffRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        staffRepo.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ---- Education ----
+
+    @GetMapping("/edu")
+    public List<Staffedu> listAllEdu() {
+        return eduRepo.findAll();
+    }
+
+    @PostMapping("/edu")
+    public Staffedu createEdu(@RequestBody Staffedu edu) {
+        return eduRepo.save(edu);
+    }
+
+    // ---- Position ----
+
+    @GetMapping("/post")
+    public List<Staffpost> listAllPost() {
+        return postRepo.findAll();
+    }
+
+    @PostMapping("/post")
+    public Staffpost createPost(@RequestBody Staffpost post) {
+        return postRepo.save(post);
+    }
 }

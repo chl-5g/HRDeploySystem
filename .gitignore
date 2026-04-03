@@ -1,0 +1,17 @@
+target/
+*.iml
+.idea/
+*.class
+*.jar
+!hr-deploy-system.jar
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

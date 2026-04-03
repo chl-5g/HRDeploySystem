@@ -1,134 +1,61 @@
 package org.caihaolun.model;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import java.sql.Timestamp;
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
-/**
- * Created by Administrator on 2017/3/9.
- */
 @Entity
+@Table(name = "staff")
 public class Staff {
-    private String id;
-    private String name;
-    private String sex;
-    private Timestamp birth;
-    private String nation;
-    private String locate;
-    private String iDnum;
-    private String tel;
 
     @Id
-    @Column(name = "id")
-    public String getId() {
-        return id;
-    }
+    @Column(length = 64)
+    private String id;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    @Column(length = 64)
+    private String name;
 
-    @Basic
-    @Column(name = "name")
-    public String getName() {
-        return name;
-    }
+    @Column(length = 8)
+    private String sex;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    private LocalDateTime birth;
 
-    @Basic
-    @Column(name = "sex")
-    public String getSex() {
-        return sex;
-    }
+    @Column(length = 32)
+    private String nation;
 
-    public void setSex(String sex) {
-        this.sex = sex;
-    }
+    @Column(length = 128)
+    private String locate;
 
-    @Basic
-    @Column(name = "birth")
-    public Timestamp getBirth() {
-        return birth;
-    }
+    @Column(name = "IDnum", length = 32)
+    private String idNum;
 
-    public void setBirth(Timestamp birth) {
-        this.birth = birth;
-    }
+    @Column(name = "Tel", length = 32)
+    private String tel;
 
-    @Basic
-    @Column(name = "nation")
-    public String getNation() {
-        return nation;
-    }
-
-    public void setNation(String nation) {
-        this.nation = nation;
-    }
-
-    @Basic
-    @Column(name = "locate")
-    public String getLocate() {
-        return locate;
-    }
-
-    public void setLocate(String locate) {
-        this.locate = locate;
-    }
-
-    @Basic
-    @Column(name = "IDnum")
-    public String getiDnum() {
-        return iDnum;
-    }
-
-    public void setiDnum(String iDnum) {
-        this.iDnum = iDnum;
-    }
-
-    @Basic
-    @Column(name = "Tel")
-    public String getTel() {
-        return tel;
-    }
-
-    public void setTel(String tel) {
-        this.tel = tel;
-    }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getSex() { return sex; }
+    public void setSex(String sex) { this.sex = sex; }
+    public LocalDateTime getBirth() { return birth; }
+    public void setBirth(LocalDateTime birth) { this.birth = birth; }
+    public String getNation() { return nation; }
+    public void setNation(String nation) { this.nation = nation; }
+    public String getLocate() { return locate; }
+    public void setLocate(String locate) { this.locate = locate; }
+    public String getIdNum() { return idNum; }
+    public void setIdNum(String idNum) { this.idNum = idNum; }
+    public String getTel() { return tel; }
+    public void setTel(String tel) { this.tel = tel; }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Staff staff = (Staff) o;
-
-        if (id != null ? !id.equals(staff.id) : staff.id != null) return false;
-        if (name != null ? !name.equals(staff.name) : staff.name != null) return false;
-        if (sex != null ? !sex.equals(staff.sex) : staff.sex != null) return false;
-        if (birth != null ? !birth.equals(staff.birth) : staff.birth != null) return false;
-        if (nation != null ? !nation.equals(staff.nation) : staff.nation != null) return false;
-        if (locate != null ? !locate.equals(staff.locate) : staff.locate != null) return false;
-        if (iDnum != null ? !iDnum.equals(staff.iDnum) : staff.iDnum != null) return false;
-        if (tel != null ? !tel.equals(staff.tel) : staff.tel != null) return false;
-
-        return true;
+        if (!(o instanceof Staff)) return false;
+        return Objects.equals(id, ((Staff) o).id);
     }
 
     @Override
-    public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (sex != null ? sex.hashCode() : 0);
-        result = 31 * result + (birth != null ? birth.hashCode() : 0);
-        result = 31 * result + (nation != null ? nation.hashCode() : 0);
-        result = 31 * result + (locate != null ? locate.hashCode() : 0);
-        result = 31 * result + (iDnum != null ? iDnum.hashCode() : 0);
-        result = 31 * result + (tel != null ? tel.hashCode() : 0);
-        return result;
-    }
+    public int hashCode() { return Objects.hash(id); }
 }

@@ -3,7 +3,8 @@ package org.caihaolun.service;
 import java.util.*;
 
 /**
- * 简单离散特征 ID3 决策树实现。
+ * ID3 Decision Tree — pure algorithm, no Spring dependency.
+ * Trains on discrete features and predicts a label string.
  */
 public class ID3DecisionTree {
 
@@ -16,13 +17,8 @@ public class ID3DecisionTree {
             this.label = label;
         }
 
-        public Map<String, String> getFeatures() {
-            return features;
-        }
-
-        public String getLabel() {
-            return label;
-        }
+        public Map<String, String> getFeatures() { return features; }
+        public String getLabel() { return label; }
     }
 
     private static class Node {
@@ -115,7 +111,7 @@ public class ID3DecisionTree {
     private double entropy(List<Sample> samples) {
         Map<String, Integer> cnt = new HashMap<>();
         for (Sample s : samples) {
-            cnt.put(s.getLabel(), cnt.getOrDefault(s.getLabel(), 0) + 1);
+            cnt.merge(s.getLabel(), 1, Integer::sum);
         }
         double sum = samples.size();
         double h = 0.0;
@@ -143,9 +139,7 @@ public class ID3DecisionTree {
     private boolean allSameLabel(List<Sample> samples) {
         String first = samples.get(0).getLabel();
         for (Sample s : samples) {
-            if (!Objects.equals(first, s.getLabel())) {
-                return false;
-            }
+            if (!Objects.equals(first, s.getLabel())) return false;
         }
         return true;
     }
@@ -153,17 +147,12 @@ public class ID3DecisionTree {
     private String majorityLabel(List<Sample> samples) {
         Map<String, Integer> cnt = new HashMap<>();
         for (Sample s : samples) {
-            cnt.put(s.getLabel(), cnt.getOrDefault(s.getLabel(), 0) + 1);
+            cnt.merge(s.getLabel(), 1, Integer::sum);
         }
-        String best = null;
-        int bestCnt = -1;
-        for (Map.Entry<String, Integer> e : cnt.entrySet()) {
-            if (e.getValue() > bestCnt) {
-                bestCnt = e.getValue();
-                best = e.getKey();
-            }
-        }
-        return best;
+        return cnt.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
     }
 
     private String safe(String s) {

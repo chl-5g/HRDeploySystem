@@ -1,163 +1,149 @@
-# HRDeploySystem
+# HRDeploySystem — 人力资源智能部署系统
 
-## 项目缘起
+## 项目简介
 
-这是我人生里认真做完的第一个完整项目。  
-前后大概投入了两个月：后端约一周，前端一个多月，剩下时间都在补框架、补算法和反复调试。  
-项目虽然有很多不成熟的地方，但它是我从“会写一点代码”走向“能交付一个系统”的起点。
+基于 **Spring Boot 2.7** + **Spring Data JPA** + **Vue 3** 的人力资源管理系统，核心功能是通过 **ID3 决策树算法** 实现新员工岗位智能匹配，以及基于绩效评分的老员工岗位评估。
 
-这是一个基于 `Spring + Spring MVC + Hibernate` 的传统 Java Web 人力资源管理系统（WAR 项目）。
-
-项目核心目标是两部分：
-- 基础人事管理：员工、学历、岗位等信息维护。
-- 智能匹配模块：对新员工进行岗位/级别推荐，对老员工进行评估辅助。
-
-## 当前功能概览
-
-### 1) 基础人事模块
-- 员工基础信息管理（新增、查询、更新、离职）。
-- 学历信息管理（含学历变更历史）。
-- 岗位信息管理与相关展示页面。
-
-### 2) 智能匹配模块
-- 新员工智能分配：基于学历类别、学历、专业、毕业院校进行部门与级别推荐。
-- 老员工评估：基于能力/业绩等评分辅助岗位调整（现有规则逻辑）。
-
-## 关键更新（已落地）
-
-### 新员工匹配已接入 ID3 决策树
-- 位置：`src/main/Java/org/caihaolun/service/CalculateNewStaff.java`
-- 新增：`src/main/Java/org/caihaolun/service/ID3DecisionTree.java`
-- 方式：离散特征 ID3 训练 + 预测，输出 `部门|级别`。
-- 回退策略：预测异常时自动走兜底等级逻辑，保证服务可用。
-
-### 修复输入映射错误
-- 位置：`src/main/Java/org/caihaolun/controller/StaffPatternController.java`
-- 修复点：`graduate` 由错误的 `getMajor()` 改为 `getGraduate()`，避免院校特征失真。
-
-### Maven 构建兼容性调整
-- 在 `pom.xml` 中新增 `javax.annotation-api`（兼容较新 JDK 编译）。
-- 排除不可解析的传递依赖 `com.intellify:intellify-api`。
-- 升级 `maven-war-plugin` 到 `3.4.0`，避免旧插件与新 JDK 不兼容。
-
-### 前后端解耦第一步（已开始）
-- 新增 API：`POST /api/staff/match/new`
-- 新增 API：`POST /api/staff/match/old`
-- 位置：`src/main/Java/org/caihaolun/controller/StaffMatchApiController.java`
-- 说明：在保留原 JSP 流程的前提下，先将“新员工智能匹配/老员工评估”能力 API 化，后续可直接接 Vue/React 等新前端。
-- 请求 JSON 示例：
-```json
-{
-  "category": "理工类",
-  "qual": "本科",
-  "major": "计算机科学与技术",
-  "graduate": "北京大学"
-}
-```
-- 响应 JSON 示例：
-```json
-{
-  "deptName": "研发部",
-  "level": 3,
-  "raw": {
-    "部门名称": "研发部",
-    "级别": "3"
-  }
-}
-```
-
-- 老员工评估请求 JSON 示例（建议直接传岗位与职级，当前接口按请求体计算）：
-```json
-{
-  "score1": "8",
-  "score2": "7",
-  "score3": "9",
-  "post": "研发部",
-  "rank": "P5"
-}
-```
+> 这是我第一个完整项目的现代化重构版本。原版基于 Spring 4 + Hibernate 4 + JSP（2017），现已全面升级为前后端分离的现代架构。
 
 ## 技术栈
 
-- Java 8 语法目标（`maven.compiler.source/target=1.8`）
-- Spring 4.1.3
-- Spring MVC
-- Hibernate 4.3.5
-- JSP + JSTL
-- MySQL + c3p0
-- Maven（打包类型：`war`）
+| 层面 | 技术 |
+|------|------|
+| **后端** | Spring Boot 2.7、Spring Data JPA、HikariCP |
+| **数据库** | MySQL 8.0 |
+| **前端** | Vue 3 + Vite + Vue Router + Axios |
+| **算法** | ID3 决策树（纯 Java 实现，训练数据存储在数据库中） |
+| **API 文档** | SpringDoc OpenAPI（Swagger UI） |
+| **测试** | JUnit 5 + Mockito |
+| **部署** | Docker + docker-compose |
 
-## 项目结构（核心）
+## 核心功能
 
-- `src/main/Java/org/caihaolun/controller`：Web 控制层
-- `src/main/Java/org/caihaolun/dao`：数据访问层
-- `src/main/Java/org/caihaolun/model`：实体模型
-- `src/main/Java/org/caihaolun/service`：业务逻辑（含智能匹配）
-- `src/main/resources/applicationContext.xml`：Spring/Hibernate 配置
-- `src/main/resources/dispatcher.xml`：Spring MVC 配置
-- `src/main/resources/jdbc.properties`：数据库连接配置
-- `src/main/webapp`：JSP 页面与静态资源
+### 1. 基础人事管理
+- 员工信息 CRUD（基本信息、学历、岗位）
+- 部门管理
 
-## 本地运行
+### 2. 新员工智能匹配
+- 输入：学历类别、学历、专业、毕业院校
+- 算法：ID3 决策树（基于信息增益的特征分裂）
+- 输出：推荐部门 + 推荐职级
+- 训练样本存储在数据库 `training_sample` 表中，支持运行时增删和决策树重建
 
-### 1) 环境准备
-- JDK 14（当前机器已验证可编译通过）
+### 3. 老员工评估
+- 输入：能力/业绩/态度三项评分（1-10）
+- 算法：加权综合评分（0.4/0.3/0.3）
+- 输出：建议职级调整
+
+## 项目结构
+
+```
+HRDeploySystem/
+├── pom.xml                          # Spring Boot 2.7 + JPA + MySQL
+├── src/main/java/org/caihaolun/
+│   ├── HrDeployApplication.java     # 启动类
+│   ├── config/WebConfig.java        # CORS 配置
+│   ├── model/                       # JPA 实体（11个）
+│   ├── repository/                  # Spring Data JPA 接口（6个）
+│   ├── service/
+│   │   ├── ID3DecisionTree.java     # ID3 算法实现
+│   │   └── MatchService.java        # 智能匹配服务
+│   └── controller/                  # REST API（4个）
+├── src/main/resources/
+│   ├── application.yml              # 配置
+│   └── data.sql                     # 训练样本初始数据
+├── src/test/java/                   # JUnit 5 测试
+├── frontend/                        # Vue 3 + Vite
+│   ├── src/views/                   # 页面组件
+│   └── src/api/http.js              # Axios 封装
+├── Dockerfile
+├── docker-compose.yml
+└── .gitignore
+```
+
+## API 接口
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/auth/login` | 登录 |
+| POST | `/api/auth/register` | 注册 |
+| GET | `/api/staff` | 员工列表 |
+| GET | `/api/staff/{id}` | 员工详情（含学历/岗位） |
+| POST | `/api/staff` | 新增员工 |
+| PUT | `/api/staff/{id}` | 更新员工 |
+| DELETE | `/api/staff/{id}` | 删除员工 |
+| GET/POST | `/api/staff/edu` | 学历管理 |
+| GET/POST | `/api/staff/post` | 岗位管理 |
+| GET | `/api/dept` | 部门列表 |
+| POST | `/api/match/new` | 新员工智能匹配 |
+| POST | `/api/match/old` | 老员工评估 |
+| GET | `/api/match/samples` | 查看训练样本 |
+| POST | `/api/match/samples` | 添加训练样本并重建决策树 |
+| POST | `/api/match/rebuild` | 手动重建决策树 |
+
+启动后访问 `http://localhost:8080/swagger-ui.html` 查看完整 API 文档。
+
+## 快速开始
+
+### 环境要求
+- JDK 14+
 - Maven 3.x
-- MySQL 5.x/8.x（需提前创建数据库）
+- MySQL 8.x
+- Node.js 18+（前端开发）
 
-### 2) 配置数据库
-编辑 `src/main/resources/jdbc.properties`：
-- `jdbc.url`
-- `jdbc.username`
-- `jdbc.password`
+### 1. 数据库准备
 
-默认示例：
-- 库名：`hrdeploysystem`
-- 用户：`root`
-- 密码：`1234`（建议改为本地实际密码）
-
-### 2.1) 数据库当前状态（本仓库已按此验证）
-- MySQL：`8.0.x`，本地监听 `127.0.0.1:3306`。
-- JDBC 驱动：`com.mysql.cj.jdbc.Driver`（`mysql-connector-j 8.0.33`）。
-- 连接参数（默认）：`serverTimezone=Asia/Shanghai`、`useSSL=false`、`allowPublicKeyRetrieval=true`。
-- 已使用库：`hrdeploysystem`。
-- 登录依赖表：`user_`（字段：`email` 主键、`username`、`password`）。
-
-可用以下命令快速自检：
 ```bash
-nc -zv 127.0.0.1 3306
-mysql -h127.0.0.1 -P3306 -uroot -p -e "USE hrdeploysystem; SHOW TABLES LIKE 'user_';"
+mysql -uroot -p -e "CREATE DATABASE IF NOT EXISTS hrdeploysystem CHARACTER SET utf8mb4;"
 ```
 
-若 `user_` 不存在，可先初始化：
-```sql
-CREATE TABLE IF NOT EXISTS user_ (
-  email VARCHAR(128) NOT NULL,
-  username VARCHAR(128),
-  password VARCHAR(128),
-  PRIMARY KEY (email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-```
+### 2. 启动后端
 
-### 3) 编译打包
 ```bash
-mvn -DskipTests package
+mvn spring-boot:run
 ```
 
-成功后产物：
-- `target/hrdeploysystem2.war`
+首次启动会自动建表并导入训练样本数据。
 
-### 4) 部署
-将 `war` 部署到 Tomcat 等 Servlet 容器，启动后访问登录页（`login.jsp`）。
+### 3. 启动前端（开发模式）
 
-## 已知问题
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-- `pom.xml` 中存在重复的 `c3p0` 依赖声明，当前不影响打包，但建议后续清理。
-- 暂无自动化测试用例，算法和业务回归主要依赖手工验证。
-- 页面为传统 JSP 结构，前端可维护性一般，适合后续逐步模块化改造。
+访问 `http://localhost:5173`。
 
-## 后续建议
+### 4. Docker 一键启动
 
-- 为 `CalculateNewStaff` 增加最小单测，锁定 ID3 输出稳定性。
-- 将 ID3 训练样本从硬编码迁移到配置或数据库。
-- 清理重复依赖并补充标准 `.gitignore`（如 `target/`）。
+```bash
+mvn package -DskipTests
+docker-compose up --build
+```
+
+## 测试
+
+```bash
+mvn test
+```
+
+当前通过 9 个测试用例：
+- `ID3DecisionTreeTest`（4）：训练、预测、边界条件
+- `MatchServiceTest`（5）：新员工匹配、老员工评估、特征归一化
+
+## 与 v1.0 的主要变化
+
+| 维度 | v1.0（2017） | v2.0（2026） |
+|------|-------------|-------------|
+| 框架 | Spring 4.1 + Hibernate 4.3 + XML 配置 | Spring Boot 2.7 + Spring Data JPA + YAML |
+| 前端 | JSP + jQuery | Vue 3 + Vite |
+| API | JSP 表单提交 + 页面跳转 | RESTful JSON API |
+| 连接池 | c3p0（3个重复依赖） | HikariCP（零配置） |
+| 数据层 | HibernateDaoSupport + 手动 CRUD | JpaRepository 接口（零代码） |
+| DI | Controller 里 `new ClassPathXmlApplicationContext()` | 构造器注入 |
+| 线程安全 | `static privateStaff` 跨请求共享 | 无状态 REST |
+| 训练数据 | Java 代码硬编码 | 数据库存储，运行时可更新 |
+| 测试 | 无 | JUnit 5 + Mockito |
+| 部署 | WAR + Tomcat | JAR + Docker |
+| API 文档 | 无 | Swagger UI |
