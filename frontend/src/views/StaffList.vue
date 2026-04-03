@@ -1,12 +1,12 @@
 <template>
   <div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div class="section-head">
       <h2>员工列表</h2>
       <button class="btn btn-primary" @click="showAdd=!showAdd">{{ showAdd ? '取消' : '添加员工' }}</button>
     </div>
 
     <div v-if="showAdd" class="card">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="grid-2">
         <div class="form-group"><label>工号</label><input v-model="form.id" /></div>
         <div class="form-group"><label>姓名</label><input v-model="form.name" /></div>
         <div class="form-group"><label>性别</label><select v-model="form.sex"><option>男</option><option>女</option></select></div>
@@ -30,10 +30,10 @@
             <td>{{ s.tel }}</td>
             <td>
               <router-link :to="'/staff/'+s.id" class="btn btn-primary btn-sm">详情</router-link>
-              <button class="btn btn-danger btn-sm" style="margin-left:4px" @click="del(s.id)">删除</button>
+              <button class="btn btn-danger btn-sm ml-6" @click="del(s.id)">删除</button>
             </td>
           </tr>
-          <tr v-if="!list.length"><td colspan="6" style="text-align:center;color:#999">暂无数据</td></tr>
+          <tr v-if="!list.length"><td colspan="6" class="empty-cell">暂无数据</td></tr>
         </tbody>
       </table>
     </div>
@@ -59,3 +59,8 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.ml-6 { margin-left: 6px; }
+.empty-cell { text-align: center; color: #94a3b8; }
+</style>

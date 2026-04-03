@@ -43,7 +43,7 @@ HRDeploySystem/
 ├── src/main/java/org/caihaolun/
 │   ├── HrDeployApplication.java     # 启动类
 │   ├── config/WebConfig.java        # CORS 配置
-│   ├── model/                       # JPA 实体（11个）
+│   ├── model/                       # JPA 实体（6个）
 │   ├── repository/                  # Spring Data JPA 接口（6个）
 │   ├── service/
 │   │   ├── ID3DecisionTree.java     # ID3 算法实现
@@ -81,7 +81,7 @@ HRDeploySystem/
 | POST | `/api/match/samples` | 添加训练样本并重建决策树 |
 | POST | `/api/match/rebuild` | 手动重建决策树 |
 
-启动后访问 `http://localhost:8080/swagger-ui.html` 查看完整 API 文档。
+启动后访问 `http://localhost:8081/swagger-ui.html` 查看完整 API 文档。
 
 ## 快速开始
 
@@ -97,10 +97,10 @@ HRDeploySystem/
 mysql -uroot -p -e "CREATE DATABASE IF NOT EXISTS hrdeploysystem CHARACTER SET utf8mb4;"
 ```
 
-### 2. 启动后端
+### 2. 启动后端（开发模式）
 
 ```bash
-mvn spring-boot:run
+mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=8081"
 ```
 
 首次启动会自动建表并导入训练样本数据。
@@ -113,13 +113,37 @@ npm install
 npm run dev
 ```
 
-访问 `http://localhost:5173`。
+默认端口已配置为 `8080`，并将 `/api` 代理到 `http://localhost:8081`。
 
-### 4. Docker 一键启动
+### 4. 访问地址（本地开发）
+
+- 前端页面：`http://127.0.0.1:8080/`
+- 后端 API：`http://127.0.0.1:8081/api/*`
+- Swagger：`http://127.0.0.1:8081/swagger-ui.html`
+
+> 说明：旧地址 `http://127.0.0.1:8080/hrdeploysystem2/` 属于历史 JSP 路径，当前前后端分离版本不再作为主入口。
+### 5. Docker 一键启动
 
 ```bash
 mvn package -DskipTests
 docker-compose up --build
+```
+
+## 常见问题
+
+### 员工管理 CRUD 无法操作
+
+优先检查是否走了正确链路：
+
+- 页面应访问 `http://127.0.0.1:8080/`（不是 `.../hrdeploysystem2/...`）
+- 后端应监听 `8081`
+- 前端代理应为：`/api -> http://localhost:8081`
+
+可用以下命令快速自检：
+
+```bash
+curl -sS -o /dev/null -w "UI:%{http_code}\n" http://127.0.0.1:8080/
+curl -sS -o /dev/null -w "API:%{http_code}\n" http://127.0.0.1:8081/api/staff
 ```
 
 ## 测试

@@ -1,8 +1,8 @@
 <template>
   <div>
-    <h2 style="margin-bottom:16px">新员工智能匹配</h2>
+    <h2 class="page-title">新员工智能匹配</h2>
     <div class="card">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="grid-2">
         <div class="form-group">
           <label>学历类别</label>
           <select v-model="form.category">

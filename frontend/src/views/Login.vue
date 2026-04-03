@@ -1,7 +1,8 @@
 <template>
-  <div style="max-width:360px;margin:80px auto">
-    <div class="card">
-      <h2 style="text-align:center;margin-bottom:24px">HR Deploy System</h2>
+  <div class="login-wrap">
+    <div class="card login-card">
+      <p class="login-badge">智能人力资源系统</p>
+      <h2 class="login-title">欢迎登录 HR Deploy</h2>
       <div class="form-group">
         <label>邮箱</label>
         <input v-model="email" type="email" placeholder="请输入邮箱" @keyup.enter="login" />
@@ -11,18 +12,18 @@
         <input v-model="password" type="password" placeholder="请输入密码" @keyup.enter="login" />
       </div>
       <p v-if="error" class="msg-error">{{ error }}</p>
-      <button class="btn btn-primary" style="width:100%" @click="login">登录</button>
-      <p style="text-align:center;margin-top:12px;font-size:13px">
+      <button class="btn btn-primary full-width" @click="login">登录</button>
+      <p class="switch-text">
         没有账号？<a href="#" @click.prevent="showRegister=true">注册</a>
       </p>
     </div>
 
-    <div v-if="showRegister" class="card">
-      <h3 style="margin-bottom:16px">注册新用户</h3>
+    <div v-if="showRegister" class="card register-card">
+      <h3 class="register-title">注册新用户</h3>
       <div class="form-group"><label>邮箱</label><input v-model="regEmail" /></div>
       <div class="form-group"><label>用户名</label><input v-model="regUsername" /></div>
       <div class="form-group"><label>密码</label><input v-model="regPassword" type="password" /></div>
-      <p v-if="regMsg" :class="regOk?'':'msg-error'" :style="regOk?'color:#2e7d32':''">{{ regMsg }}</p>
+      <p v-if="regMsg" :class="regOk ? 'msg-success' : 'msg-error'">{{ regMsg }}</p>
       <button class="btn btn-primary" @click="register">注册</button>
     </div>
   </div>
@@ -61,3 +62,35 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.login-wrap {
+  max-width: 420px;
+  margin: 70px auto 0;
+}
+.login-card { padding-top: 28px; }
+.login-badge {
+  display: inline-block;
+  font-size: 12px;
+  color: #2563eb;
+  background: #e8f0ff;
+  border: 1px solid #bcd2ff;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.login-title {
+  margin: 12px 0 20px;
+  font-size: 24px;
+}
+.full-width { width: 100%; }
+.switch-text {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #6b7280;
+}
+.switch-text a { color: #1d4ed8; text-decoration: none; }
+.register-card { margin-top: 14px; }
+.register-title { margin-bottom: 14px; font-size: 18px; }
+.msg-success { color: #0f766e; margin-top: 8px; font-size: 13px; }
+</style>

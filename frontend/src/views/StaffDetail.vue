@@ -1,10 +1,10 @@
 <template>
   <div>
-    <h2 style="margin-bottom:16px">员工详情</h2>
+    <h2 class="page-title">员工详情</h2>
     <div v-if="data" class="card">
       <h3>基本信息</h3>
       <table>
-        <tr><th style="width:100px">工号</th><td>{{ data.staff.id }}</td></tr>
+        <tr><th class="field-key">工号</th><td>{{ data.staff.id }}</td></tr>
         <tr><th>姓名</th><td>{{ data.staff.name }}</td></tr>
         <tr><th>性别</th><td>{{ data.staff.sex }}</td></tr>
         <tr><th>民族</th><td>{{ data.staff.nation }}</td></tr>
@@ -15,7 +15,7 @@
     <div v-if="data && data.education" class="card">
       <h3>学历信息</h3>
       <table>
-        <tr><th style="width:100px">类别</th><td>{{ data.education.category }}</td></tr>
+        <tr><th class="field-key">类别</th><td>{{ data.education.category }}</td></tr>
         <tr><th>学历</th><td>{{ data.education.qual }}</td></tr>
         <tr><th>专业</th><td>{{ data.education.major }}</td></tr>
         <tr><th>毕业院校</th><td>{{ data.education.graduate }}</td></tr>
@@ -24,12 +24,12 @@
     <div v-if="data && data.position" class="card">
       <h3>岗位信息</h3>
       <table>
-        <tr><th style="width:100px">部门</th><td>{{ data.position.post }}</td></tr>
+        <tr><th class="field-key">部门</th><td>{{ data.position.post }}</td></tr>
         <tr><th>职级</th><td>{{ data.position.rank }}</td></tr>
         <tr><th>薪资</th><td>{{ data.position.salary }}</td></tr>
       </table>
     </div>
-    <router-link to="/staff" class="btn btn-primary" style="margin-top:16px;display:inline-block">返回列表</router-link>
+    <router-link to="/staff" class="btn btn-primary back-btn">返回列表</router-link>
   </div>
 </template>
 
@@ -43,3 +43,13 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.field-key { width: 110px; }
+.back-btn {
+  margin-top: 12px;
+  display: inline-flex;
+  text-decoration: none;
+}
+h3 { margin-bottom: 10px; }
+</style>

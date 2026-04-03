@@ -1,8 +1,8 @@
 <template>
   <div>
-    <h2 style="margin-bottom:16px">老员工评估</h2>
+    <h2 class="page-title">老员工评估</h2>
     <div class="card">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="grid-2">
         <div class="form-group"><label>员工工号（可选）</label><input v-model="form.staffId" placeholder="自动查询岗位信息" /></div>
         <div></div>
         <div class="form-group"><label>当前部门（手动输入）</label><input v-model="form.post" placeholder="如：研发部" /></div>
