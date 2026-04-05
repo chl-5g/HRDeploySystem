@@ -39,20 +39,21 @@
 
 ```
 HRDeploySystem/
-├── pom.xml                          # Spring Boot 2.7 + JPA + MySQL
-├── src/main/java/org/caihaolun/
-│   ├── HrDeployApplication.java     # 启动类
-│   ├── config/WebConfig.java        # CORS 配置
-│   ├── model/                       # JPA 实体（6个）
-│   ├── repository/                  # Spring Data JPA 接口（6个）
-│   ├── service/
-│   │   ├── ID3DecisionTree.java     # ID3 算法实现
-│   │   └── MatchService.java        # 智能匹配服务
-│   └── controller/                  # REST API（4个）
-├── src/main/resources/
-│   ├── application.yml              # 配置
-│   └── data.sql                     # 训练样本初始数据
-├── src/test/java/                   # JUnit 5 测试
+├── pom.xml                          # Spring Boot 2.7 + JPA + MySQL（源码根见下方 backend）
+├── backend/
+│   ├── main/Java/org/caihaolun/
+│   │   ├── HrDeployApplication.java # 启动类
+│   │   ├── config/WebConfig.java    # CORS 配置
+│   │   ├── model/                   # JPA 实体（6个）
+│   │   ├── repository/              # Spring Data JPA 接口（6个）
+│   │   ├── service/
+│   │   │   ├── ID3DecisionTree.java # ID3 算法实现
+│   │   │   └── MatchService.java    # 智能匹配服务
+│   │   └── controller/              # REST API（4个）
+│   ├── main/resources/
+│   │   ├── application.yml          # 配置
+│   │   └── data.sql                 # 训练样本初始数据
+│   └── test/java/                   # JUnit 5 测试
 ├── frontend/                        # Vue 3 + Vite
 │   ├── src/views/                   # 页面组件
 │   └── src/api/http.js              # Axios 封装
