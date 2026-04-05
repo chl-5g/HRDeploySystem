@@ -1,4 +1,7 @@
 target/
+
+# Local runtime (e.g. Tomcat tarball / extract)
+.runtime/
 *.iml
 .idea/
 *.class
